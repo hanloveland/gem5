@@ -1,0 +1,3 @@
+1. Compile mm.cpp in binary folder. To compile mm.cpp by Makefile, you must modify GEM5_PATH accoding to your Gem5 folder. 
+2. run base_cpu_checkput.py. (e.g., gem5-x86 base_cpu_checkout.py -b binary/mm) it generates chechpoint folder. (you can chage the checkpoint path and folder name.)
+3. run base_cpu_restoration.py. (e.g., gem5-x86 base_cpu_restoration.py -b binary/mm). it simulate only ROI region of running application.  
