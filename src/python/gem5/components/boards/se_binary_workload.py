@@ -85,7 +85,7 @@ class SEBinaryWorkload:
 
         binary_path = binary.get_local_path()
         self.workload = SEWorkload.init_compatible(binary_path)
-
+        """
         process = Process()
         process.executable = binary_path
         process.cmd = [binary_path] + arguments
@@ -97,6 +97,20 @@ class SEBinaryWorkload:
             process.errout = stderr_file.as_posix()
 
         for core in self.get_processor().get_cores():
+            core.set_workload(process)
+        """
+        idx = 0
+        for core in self.get_processor().get_cores():
+            process = Process(pid=100 + idx)
+            idx+=1
+            process.executable = binary_path
+            process.cmd = [binary_path] + arguments
+            if stdin_file is not None:
+                process.input = stdin_file.get_local_path()
+            if stdout_file is not None:
+                process.output = stdout_file.as_posix()
+            if stderr_file is not None:
+                process.errout = stderr_file.as_posix()
             core.set_workload(process)
 
         # Set whether to exit on work items for the se_workload
