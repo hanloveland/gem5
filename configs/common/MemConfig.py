@@ -236,7 +236,16 @@ def config_mem(options, system):
                     )
 
                 # Create the controller that will drive the interface
-                mem_ctrl = dram_intf.controller()
+                if issubclass(intf, m5.objects.Ramulator2):
+                    print(" ============= USE RAMULATOR ============== ")
+                    mem_ctrl = dram_intf
+                    if not options.ramulator_config:
+                        print("--mem-type=Ramulator2 requires options --ramulator-config")
+                        exit(1)        
+                    mem_ctrl.config_path = options.ramulator_config
+                    print("Ramulator2 - config path: ",mem_ctrl.config_path)
+                else:
+                    mem_ctrl = dram_intf.controller()
 
                 mem_ctrls.append(mem_ctrl)
 

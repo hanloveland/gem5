@@ -105,6 +105,19 @@ PhysicalMemory::PhysicalMemory(const std::string& _name,
 
             // add the range to our interval tree and make sure it does not
             // intersect an existing range
+	    /*
+	    DPRINTF(AddrRanges,
+                    "[%s] AddrMap Size %d\n",
+		    m->name(),
+                    addrMap.size());
+   	    const auto& addr_end = addrMap.end();
+            DPRINTF(AddrRanges,
+                    "[%s] addressMap end Range Start [%d] End [%d] Size [%d] \n",
+		    m->name(),
+                    addr_end->first.start(),
+                    addr_end->first.end(),
+                    addr_end->first.size());
+            */
             fatal_if(addrMap.insert(m->getAddrRange(), m) == addrMap.end(),
                      "Memory address range for %s is overlapping\n",
                      m->name());

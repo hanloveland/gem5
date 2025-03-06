@@ -276,6 +276,11 @@ else:
     system.membus = SystemXBar()
     system.system_port = system.membus.cpu_side_ports
     CacheConfig.config_cache(args, system)
+    print("Off-chip (DRAM) Memory Configuration")
+    print("mem_type     : ",args.mem_type)
+    print("mem_channels : ",args.mem_channels)
+    print("mem_ranks    : ",args.mem_ranks)
+    print("mem_size     : ",args.mem_size)
     MemConfig.config_mem(args, system)
     config_filesystem(system, args)
 
