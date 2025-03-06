@@ -2,8 +2,8 @@
 
 #include "base/callback.hh"
 #include "base/trace.hh"
-#include "debug/Ramulator2.hh"
 #include "debug/Drain.hh"
+#include "debug/Ramulator2.hh"
 #include "sim/system.hh"
 
 // spdlog collides with gem5...
@@ -11,8 +11,8 @@
 #undef warn
 
 #include "ramulator2/src/base/base.h"
-#include "ramulator2/src/base/request.h"
 #include "ramulator2/src/base/config.h"
+#include "ramulator2/src/base/request.h"
 #include "ramulator2/src/frontend/frontend.h"
 #include "ramulator2/src/memory_system/memory_system.h"
 
@@ -33,7 +33,7 @@ Ramulator2::Ramulator2(const Params &p) :
 {
     DPRINTF(Ramulator2, "Instantiated Ramulator2 \n");
 
-    registerExitCallback([this]() { 
+    registerExitCallback([this]() {
         ramulator2_frontend->finalize();
         ramulator2_memorysystem->finalize();
     });
@@ -173,11 +173,11 @@ Ramulator2::recvTimingReq(PacketPtr pkt)
         return false;
 
     bool enqueue_success = false;
-    if (pkt->isRead()) 
+    if (pkt->isRead())
     {
         // Generate ramulator READ request and try to send to ramulator's memory system
         enqueue_success = ramulator2_frontend->
-            receive_external_requests(0, pkt->getAddr(), 0, 
+            receive_external_requests(0, pkt->getAddr(), 0,
             [this](Ramulator::Request& req) {
                 DPRINTF(Ramulator2, "Read to %ld completed.\n", req.addr);
                 auto& pkt_q = outstandingReads.find(req.addr)->second;
@@ -192,7 +192,7 @@ Ramulator2::recvTimingReq(PacketPtr pkt)
                 accessAndRespond(pkt);
             });
 
-        if (enqueue_success) 
+        if (enqueue_success)
         {
             outstandingReads[pkt->getAddr()].push_back(pkt);
 
@@ -200,15 +200,15 @@ Ramulator2::recvTimingReq(PacketPtr pkt)
             // queue in the controller, and the response has been sent
             // back, note that this will differ for reads and writes
             ++nbrOutstandingReads;
-        } 
-        else 
+        }
+        else
         {
             retryReq = true;
         }
     } else if (pkt->isWrite()) {
         // Generate ramulator WRITE request and try to send to ramulator's memory system
         enqueue_success = ramulator2_frontend->
-            receive_external_requests(1, pkt->getAddr(), 0, 
+            receive_external_requests(1, pkt->getAddr(), 0,
             [this](Ramulator::Request& req) {
                 DPRINTF(Ramulator2, "Write to %ld completed.\n", req.addr);
                 auto& pkt_q = outstandingWrites.find(req.addr)->second;
@@ -223,7 +223,7 @@ Ramulator2::recvTimingReq(PacketPtr pkt)
                 accessAndRespond(pkt);
             });
 
-        if (enqueue_success) 
+        if (enqueue_success)
         {
             outstandingWrites[pkt->getAddr()].push_back(pkt);
 
@@ -231,8 +231,8 @@ Ramulator2::recvTimingReq(PacketPtr pkt)
 
             // perform the access for writes
             accessAndRespond(pkt);
-        } 
-        else 
+        }
+        else
         {
             retryReq = true;
         }

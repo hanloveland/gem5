@@ -240,10 +240,12 @@ def config_mem(options, system):
                     print(" ============= USE RAMULATOR ============== ")
                     mem_ctrl = dram_intf
                     if not options.ramulator_config:
-                        print("--mem-type=Ramulator2 requires options --ramulator-config")
-                        exit(1)        
+                        print(
+                            "--mem-type=Ramulator2 requires options --ramulator-config"
+                        )
+                        exit(1)
                     mem_ctrl.config_path = options.ramulator_config
-                    print("Ramulator2 - config path: ",mem_ctrl.config_path)
+                    print("Ramulator2 - config path: ", mem_ctrl.config_path)
                 else:
                     mem_ctrl = dram_intf.controller()
 

@@ -169,7 +169,7 @@ def addNoISAOptions(parser):
         "--ramulator-config",
         type=str,
         dest="ramulator_config",
-        help="inputs ramulator configuration file"
+        help="inputs ramulator configuration file",
     )
     # Cache Options
     parser.add_argument(

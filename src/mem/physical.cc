@@ -105,15 +105,15 @@ PhysicalMemory::PhysicalMemory(const std::string& _name,
 
             // add the range to our interval tree and make sure it does not
             // intersect an existing range
-	    /*
-	    DPRINTF(AddrRanges,
+            /*
+            DPRINTF(AddrRanges,
                     "[%s] AddrMap Size %d\n",
-		    m->name(),
+                    m->name(),
                     addrMap.size());
-   	    const auto& addr_end = addrMap.end();
+            const auto& addr_end = addrMap.end();
             DPRINTF(AddrRanges,
                     "[%s] addressMap end Range Start [%d] End [%d] Size [%d] \n",
-		    m->name(),
+                    m->name(),
                     addr_end->first.start(),
                     addr_end->first.end(),
                     addr_end->first.size());
