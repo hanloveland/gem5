@@ -1,5 +1,5 @@
 # Runing Gem5 with Ramulator
-Integrate ramulator2 into Gem2 by referring to [the link.](https://sangjae4309.github.io/docs-gem5/external_simulator/ramulator2)
+Integrate ramulator2 into Gem5 by referring to [the link.](https://sangjae4309.github.io/docs-gem5/external_simulator/ramulator2)
 base configuration file
 configs/example/se.py
 
