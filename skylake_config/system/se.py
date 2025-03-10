@@ -32,14 +32,24 @@ import m5
 from m5.objects import *
 from core import *
 from caches import *
+import sys 
+sys.path.append('../configs')
+from common import ObjectList
 
 class MySystem(System):
 
   _CPUModel = BaseCPU
+  _ramulator2_use = False
+  _ramulator2_config_path = "" 
+  _ramulator2_output_path = ""
 
   def __init__(self):
     super(MySystem, self).__init__()
 
+    print("MySstem Init ")
+    print("USE Ramualtor USE : ",self._ramulator2_use)
+    print("USE Ramualtor CONFIG PATH : ",self._ramulator2_config_path)
+    print("USE Ramualtor OUTPUT PATH : ",self._ramulator2_output_path)
     self.clk_domain = SrcClockDomain()
     self.clk_domain.clock = '3.5GHz'
     self.clk_domain.voltage_domain = VoltageDomain()
@@ -126,10 +136,38 @@ class MySystem(System):
     kernel_controller = self._createKernelMemoryController(cls)
 
     ranges = self._getInterleaveRanges(self.mem_ranges[-1], num, 6, 20)
+
+    # Generate Memory Controller's
+    mcs = []
+    for i in range(num):
+      if self._ramulator2_use == True:
+        intf = ObjectList.mem_list.get("Ramulator2")
+        if issubclass(intf, m5.objects.Ramulator2):
+            print(" ============= USE RAMULATOR ============== ")
+            test_interface = intf()
+            test_interface.range = ranges[i]
+            test_mem_ctrl = test_interface
+            test_mem_ctrl.config_path = self._ramulator2_config_path
+            test_mem_ctrl.output_path = self._ramulator2_output_path            
+            test_mem_ctrl.port = self.membus.mem_side_ports
+            mcs.append(test_mem_ctrl)
+        else: 
+            exit(1)          
+      else:
+        mcs.append(MemCtrl(dram = cls(range = ranges[i]), port = self.membus.mem_side_ports))
+    
     self.mem_cntrls = [
-        MemCtrl(dram = cls(range = ranges[i]), port = self.membus.mem_side_ports)
+        mcs[i]
         for i in range(num)
     ] + [kernel_controller]
+    #  self.mem_cntrls = [
+    #     MemCtrl(dram = cls(range = ranges[i]), port = self.membus.mem_side_ports)
+    #     for i in range(num)
+    # ] + [kernel_controller]
+    # for i in range(self.mem_cntrls.__len__()):
+    #     print("MC[%d]",i)
+    #     print(" -- range : ",self.mem_cntrls[i].range)
+
 
   def _createKernelMemoryController(self, cls):
     return MemCtrl(dram = cls(range = self.mem_ranges[0]), port = self.membus.mem_side_ports)

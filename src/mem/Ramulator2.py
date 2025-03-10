@@ -12,3 +12,4 @@ class Ramulator2(AbstractMemory):
         "The port for receiving memory requests and sending responses"
     )
     config_path = Param.String("", "--ramulator-config")
+    output_path = Param.String("Path to the Ramulator2 Output Files for Simulation Result")

@@ -46,6 +46,9 @@ args = parser.parse_args()
 
 class TestSystem(MySystem):
     _CPUModel = valid_configs[args.config]
+    _ramulator2_use = True
+    _ramulator2_config_path = "../ext/ramulator2/ramulator2/ddr5_config.yaml"
+    _ramulator2_output_path = "output_ramulator2.yaml"
 
 system = TestSystem()
 system.setTestBinary(args.binary)
