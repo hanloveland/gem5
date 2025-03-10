@@ -58,7 +58,8 @@ Ramulator2::init()
     ramulator2_frontend->connect_memory_system(ramulator2_memorysystem);
     ramulator2_memorysystem->connect_frontend(ramulator2_frontend);
     ramulator2_memorysystem->set_output_path(output_path);
-
+    ramulator2_memorysystem->set_use_gem5_frontend();
+    
     // if (system()->cacheLineSize() != wrapper.burstSize())
     //     fatal("Ramulator2 burst size %d does not match cache line size %d\n",
     //           wrapper.burstSize(), system()->cacheLineSize());
