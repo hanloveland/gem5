@@ -27,14 +27,18 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # Authors: Jason Lowe-Power, Trivikram Reddy
-
+from os import environ
 import m5
 from m5.objects import *
 from core import *
 from caches import *
 import sys 
-sys.path.append('../configs')
+
+GEM5_CONF_PATH = environ.get("GEM5_COMMON_CONFIG_PATH")
+sys.path.append(GEM5_CONF_PATH)
+
 from common import ObjectList
+from spec_bench import *
 
 class MySystem(System):
 
@@ -46,20 +50,20 @@ class MySystem(System):
   def __init__(self):
     super(MySystem, self).__init__()
 
-    print("MySstem Init ")
-    print("USE Ramualtor USE : ",self._ramulator2_use)
-    print("USE Ramualtor CONFIG PATH : ",self._ramulator2_config_path)
-    print("USE Ramualtor OUTPUT PATH : ",self._ramulator2_output_path)
     self.clk_domain = SrcClockDomain()
     self.clk_domain.clock = '3.5GHz'
     self.clk_domain.voltage_domain = VoltageDomain()
 
     self.mem_mode = 'timing'
     mem_size = '32GB'
-    self.mem_ranges = [AddrRange('100MB'), # For kernel
-                      AddrRange(0xC0000000, size=0x100000), # For I/0
-                      AddrRange(Addr('4GB'), size = mem_size) # All data
-                        ]
+    # self.mem_ranges = [AddrRange('100MB'), # For kernel
+    #                   AddrRange(0xC0000000, size=0x100000), # For I/0
+    #                   AddrRange(Addr('4GB'), size = mem_size) # All data
+    #                     ]
+
+    # We use System Memory only for SE (Not Kernel)
+    self.mem_ranges = [AddrRange(Addr(mem_size), size = '100MB'),
+                       AddrRange(mem_size)]    
 
     self.cpu = self._CPUModel()
     
@@ -144,6 +148,8 @@ class MySystem(System):
         intf = ObjectList.mem_list.get("Ramulator2")
         if issubclass(intf, m5.objects.Ramulator2):
             print(" ============= USE RAMULATOR ============== ")
+            print("Ramualtor2 CONFIG PATH : ",self._ramulator2_config_path)
+            print("Ramualtor2 OUTPUT PATH : ",self._ramulator2_output_path)            
             test_interface = intf()
             test_interface.range = ranges[i]
             test_mem_ctrl = test_interface
@@ -154,12 +160,17 @@ class MySystem(System):
         else: 
             exit(1)          
       else:
+        print("Use Gem5 DRAM Intf")
         mcs.append(MemCtrl(dram = cls(range = ranges[i]), port = self.membus.mem_side_ports))
     
+
     self.mem_cntrls = [
         mcs[i]
         for i in range(num)
-    ] + [kernel_controller]
+    ] +[kernel_controller]
+    
+    #
+    # We do not use kernel for FS
     #  self.mem_cntrls = [
     #     MemCtrl(dram = cls(range = ranges[i]), port = self.membus.mem_side_ports)
     #     for i in range(num)
@@ -197,6 +208,49 @@ class MySystem(System):
     self.cpu.workload = Process(
                       cmd = [binary_path], executable = binary_path)
     self.cpu.createThreads()
-    print(self.cpu.workload)
     process0_path = self.cpu.workload[0].executable
     self.workload = SEWorkload.init_compatible(process0_path)
+
+  # Working SPEC CPU Benchmark List
+  # 401.bzip2
+  # 403.gcc
+  # 410.bwaves
+  # 416.gamess
+  # 429.mcf
+  # 433.milc
+  # 434.zeusmp
+  # 435.gromacs
+  # 437.leslie3d
+  # 444.namd
+  # 445.gobmk
+  # 450.soplex
+  # 453.povray
+  # 454.calculix
+  # 456.hmmer
+  # 458.sjeng
+  # 459.GemsFDTD
+  # 462.libquantum
+  # 464.h264ref
+  # 465.tonto
+  # 470.lbm
+  # 471.omnetpp
+  # 473.astar
+  # 481.wrf
+  # 482.sphinx3	
+  # 483.xalancbmk
+  # 998.specrand
+  # 999.specrand
+
+  def setSpecBenmark(self, spec_path, _is_test, bench):
+    """Set up the SE process to execute the binary at binary_path"""
+    from m5 import options
+    print("SPEC CPU Path:",spec_path)
+    
+    exe_binary = spec_path + "/998.specrand/exe/specrand_base.none"
+    self.cpu.workload = set_spec_bench(spec_path, _is_test, bench, 100)
+    # self.cpu.workload = Process(
+    #                   cmd = [exe_binary] + ['324342','24239'], executable = exe_binary, output = 'rand.24239.out')
+    self.cpu.createThreads()
+    # print(self.cpu.workload)
+    process0_path = self.cpu.workload[0].executable
+    self.workload = SEWorkload.init_compatible(process0_path)    

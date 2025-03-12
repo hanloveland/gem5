@@ -17,3 +17,13 @@ Ignoring hooks on commit
 ```bash
 git commit --no-verify
 ```
+
+gcc/g++ version 
+
+Use gcc/g++-12
+```bash
+update-alternatives --config g++
+
+update-alternatives --config g++
+
+```

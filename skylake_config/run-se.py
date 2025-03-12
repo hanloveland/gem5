@@ -28,31 +28,45 @@
 # Authors: Jason Lowe-Power, Trivikram Reddy
 
 import sys 
-sys.path.append('/var/share/gem5_test/gem5/skylake_config/system')
+from os import environ
+GEM5_CPU_SYSTEM_PATH = environ.get("GEM5_CPU_CONFIG_PATH") + "/system"
+sys.path.append(GEM5_CPU_SYSTEM_PATH)
 import m5
 from m5.objects import *
 import argparse
 from system.se  import MySystem
 from system.core import *
+from options import *
 
-# , UnConstrainedCPU
-valid_configs = [VerbatimCPU, TunedCPU]
-valid_configs = {cls.__name__[:-3]:cls for cls in valid_configs}
+# valid_configs = [VerbatimCPU, TunedCPU]
+# valid_configs = {cls.__name__[:-3]:cls for cls in valid_configs}
 
 parser = argparse.ArgumentParser()
-parser.add_argument('config', choices = valid_configs.keys())
-parser.add_argument('binary', type = str, help = "Path to binary to run")
+addOptions(parser)
 args = parser.parse_args()
 
+# "../ext/ramulator2/ramulator2/ddr5_config.yaml"
+# "output_ramulator2.yaml"
 class TestSystem(MySystem):
-    _CPUModel = valid_configs[args.config]
+    # We Fix CPU Simulation Model 
+    _CPUModel = TunedCPU
     _ramulator2_use = True
-    _ramulator2_config_path = "../ext/ramulator2/ramulator2/ddr5_config.yaml"
-    _ramulator2_output_path = "output_ramulator2.yaml"
+    if args.ramulator2_config_path == "":
+        print("Not Exist Ramulator2 Configuration File!")
+        exit(1)
+    _ramulator2_config_path = args.ramulator2_config_path
+    _ramulator2_output_path = args.ramulator2_output_path
 
 system = TestSystem()
-system.setTestBinary(args.binary)
-print(args.binary)
+if args.binary != "":
+    print("Run Simple Binary File :",args.binary)
+    system.setTestBinary(args.binary)
+else:
+    print("Run SPEC CPU 2006 Benchmark")
+    print(" - set SPEC CPU Benchmark Path")
+    print(" - Input is Test? : ",args.spec_bench_test)
+    system.setSpecBenmark(args.spec_path,args.spec_bench_test,args.spec_bench)
+
 root = Root(full_system = False, system = system)
 m5.instantiate()
 
