@@ -11,5 +11,6 @@ class Ramulator2(AbstractMemory):
     port = ResponsePort(
         "The port for receiving memory requests and sending responses"
     )
-    config_path = Param.String("", "--ramulator-config")
-    output_path = Param.String("Path to the Ramulator2 Output Files for Simulation Result")
+    config_path   = Param.String("", "--ramulator-config")
+    output_path   = Param.String("Path to the Ramulator2 Output Files for Simulation Result")
+    dram_capacity = Param.Int("Ramulator2 DRAM Capacity")

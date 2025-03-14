@@ -53,6 +53,7 @@ class Ramulator2 : public AbstractMemory
 
     std::string config_path;
     std::string output_path;
+    int         dram_capacity;
     Ramulator::IFrontEnd* ramulator2_frontend;
     Ramulator::IMemorySystem* ramulator2_memorysystem;
 

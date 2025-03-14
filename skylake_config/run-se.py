@@ -31,6 +31,7 @@ import sys
 from os import environ
 GEM5_CPU_SYSTEM_PATH = environ.get("GEM5_CPU_CONFIG_PATH") + "/system"
 sys.path.append(GEM5_CPU_SYSTEM_PATH)
+# sys.path.append("/var/share/gem5_test/gem5/skylake_config/system/")
 import m5
 from m5.objects import *
 import argparse
@@ -56,6 +57,8 @@ class TestSystem(MySystem):
         exit(1)
     _ramulator2_config_path = args.ramulator2_config_path
     _ramulator2_output_path = args.ramulator2_output_path
+    if args.ramu_cap != None:
+        _ramulator2_memory_capacity = int(args.ramu_cap.strip()) 
 
 system = TestSystem()
 if args.binary != "":

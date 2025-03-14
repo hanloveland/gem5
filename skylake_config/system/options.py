@@ -74,7 +74,15 @@ def addOptions(parser):
         dest="ramulator2_output_path", 
         default ="output_ramulator2.yaml",
         help = "Ramulator2 Simulation Result file Path")           
-    
+
+    parser.add_argument(
+        '--ramu_cap', 
+        action="store",
+        type=str,
+        default=None,
+        help="""Ramulator2 Memory Capacity (string). unit is GB)""",
+    )       
+        
     parser.add_argument(
         "-I",
         "--maxinsts",

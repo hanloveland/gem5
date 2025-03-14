@@ -27,6 +27,7 @@ Ramulator2::Ramulator2(const Params &p) :
     port(name() + ".port", *this),
     config_path(p.config_path),
     output_path(p.output_path),
+    dram_capacity(p.dram_capacity),
     retryReq(false), retryResp(false), startTick(0),
     nbrOutstandingReads(0), nbrOutstandingWrites(0),
     sendResponseEvent([this]{ sendResponse(); }, name()),
@@ -59,7 +60,9 @@ Ramulator2::init()
     ramulator2_memorysystem->connect_frontend(ramulator2_frontend);
     ramulator2_memorysystem->set_output_path(output_path);
     ramulator2_memorysystem->set_use_gem5_frontend();
-    
+    if(ramulator2_memorysystem->check_dram_capcity(dram_capacity) == 0) {
+        fatal("DRAM Capacity of Ramulator2 is not equal with Gem5 Configuration (%d GB) \n",dram_capacity);
+    }
     // if (system()->cacheLineSize() != wrapper.burstSize())
     //     fatal("Ramulator2 burst size %d does not match cache line size %d\n",
     //           wrapper.burstSize(), system()->cacheLineSize());

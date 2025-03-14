@@ -36,7 +36,7 @@ import sys
 
 GEM5_CONF_PATH = environ.get("GEM5_COMMON_CONFIG_PATH")
 sys.path.append(GEM5_CONF_PATH)
-
+# sys.path.append("/var/share/gem5_test/gem5/configs")
 from common import ObjectList
 from spec_bench import *
 
@@ -44,6 +44,7 @@ class MySystem(System):
 
   _CPUModel = BaseCPU
   _ramulator2_use = False
+  _ramulator2_memory_capacity = 1
   _ramulator2_config_path = "" 
   _ramulator2_output_path = ""
 
@@ -153,8 +154,9 @@ class MySystem(System):
             test_interface = intf()
             test_interface.range = ranges[i]
             test_mem_ctrl = test_interface
-            test_mem_ctrl.config_path = self._ramulator2_config_path
-            test_mem_ctrl.output_path = self._ramulator2_output_path            
+            test_mem_ctrl.config_path   = self._ramulator2_config_path
+            test_mem_ctrl.output_path   = self._ramulator2_output_path            
+            test_mem_ctrl.dram_capacity = self._ramulator2_memory_capacity
             test_mem_ctrl.port = self.membus.mem_side_ports
             mcs.append(test_mem_ctrl)
         else: 
