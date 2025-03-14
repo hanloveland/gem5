@@ -250,6 +250,7 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
             process.cmd = [exe_binary]
         else:
             process.cmd = [exe_binary]
+        process.output = _bench + '.out'      
     elif _bench == "470.lbm":           
         exe_binary = "lbm" + exe_suffix
         process = Process(pid=_pid)

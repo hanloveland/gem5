@@ -74,3 +74,22 @@ def addOptions(parser):
         dest="ramulator2_output_path", 
         default ="output_ramulator2.yaml",
         help = "Ramulator2 Simulation Result file Path")           
+    
+    parser.add_argument(
+        "-I",
+        "--maxinsts",
+        action="store",
+        type=int,
+        default=None,
+        help="""Total number of instructions to
+                                            simulate (default: run forever)""",
+    )   
+
+    parser.add_argument(
+        "--str_maxinsts",
+        action="store",
+        type=str,
+        default=None,
+        help="""Total number of instructions to
+                                            simulate (default: run forever)""",
+    )         

@@ -67,6 +67,10 @@ else:
     print(" - Input is Test? : ",args.spec_bench_test)
     system.setSpecBenmark(args.spec_path,args.spec_bench_test,args.spec_bench)
 
+if args.str_maxinsts != None:
+    max_inst = int(args.str_maxinsts.strip())
+    system.cpu.max_insts_any_thread = max_inst
+
 root = Root(full_system = False, system = system)
 m5.instantiate()
 
