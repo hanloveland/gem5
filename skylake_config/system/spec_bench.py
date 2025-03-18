@@ -36,17 +36,17 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
-            process.cmd = [exe_binary] + ['cccp.i', '-o', 'cccp.s']
+            process.cmd = [exe_binary] + ['cccp.in', '-o', 'cccp.s']
         else:
-            process.cmd = [exe_binary] + ['166.i', '-o', '166.s']
-            #process.cmd = [exe_binary] + ['200.i', '-o', '200.s']
-            #process.cmd = [exe_binary] + ['c-typeck.i', '-o', 'c-typeck.s']
-            #process.cmd = [exe_binary] + ['cp-decl.i', '-o', 'cp-decl.s']
-            #process.cmd = [exe_binary] + ['expr.i', '-o', 'expr.s']
-            #process.cmd = [exe_binary] + ['expr2.i', '-o', 'expr2.s']
-            #process.cmd = [exe_binary] + ['g23.i', '-o', 'g23.s']
-            #process.cmd = [exe_binary] + ['s04.i', '-o', 's04.s']
-            #process.cmd = [exe_binary] + ['scilab.i', '-o', 'scilab.s']            
+            process.cmd = [exe_binary] + ['166.in', '-o', '166.s']
+            #process.cmd = [exe_binary] + ['200.in', '-o', '200.s']
+            #process.cmd = [exe_binary] + ['c-typeck.in', '-o', 'c-typeck.s']
+            #process.cmd = [exe_binary] + ['cp-decl.in', '-o', 'cp-decl.s']
+            #process.cmd = [exe_binary] + ['expr.in', '-o', 'expr.s']
+            #process.cmd = [exe_binary] + ['expr2.in', '-o', 'expr2.s']
+            #process.cmd = [exe_binary] + ['g23.in', '-o', 'g23.s']
+            #process.cmd = [exe_binary] + ['s04.in', '-o', 's04.s']
+            #process.cmd = [exe_binary] + ['scilab.in', '-o', 'scilab.s']            
         process.output = _bench + '.out'          
     elif _bench == "410.bwaves":
         exe_binary = "bwaves" + exe_suffix
