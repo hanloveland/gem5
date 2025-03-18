@@ -250,8 +250,7 @@ class MySystem(System):
     
     exe_binary = spec_path + "/998.specrand/exe/specrand_base.none"
     self.cpu.workload = set_spec_bench(spec_path, _is_test, bench, 100)
-    # self.cpu.workload = Process(
-    #                   cmd = [exe_binary] + ['324342','24239'], executable = exe_binary, output = 'rand.24239.out')
+    print(" -- process.cmd:",self.cpu.workload[0].cmd)
     self.cpu.createThreads()
     # print(self.cpu.workload)
     process0_path = self.cpu.workload[0].executable
