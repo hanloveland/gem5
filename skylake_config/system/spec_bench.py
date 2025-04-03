@@ -13,9 +13,9 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
         if _is_test == True:
             process.cmd = [exe_binary] + ['-I.lib', 'attrs.pl']
         else:
-            process.cmd = [exe_binary] + ['-I./lib', 'checkspam.pl', '2500', '5', '25', '11', '150', '1', '1', '1', '1']
+            # process.cmd = [exe_binary] + ['-I./lib', 'checkspam.pl', '2500', '5', '25', '11', '150', '1', '1', '1', '1']
             # process.cmd = [exe_binary] + ['-I./lib', 'diffmail.pl', '4', '800', '10', '17', '19', '300']
-            # process.cmd = [exe_binary] + ['-I./lib', 'splitmail.pl', '1600', '12', '26', '16', '4500']
+            process.cmd = [exe_binary] + ['-I./lib', 'splitmail.pl', '1600', '12', '26', '16', '4500']
         process.output = _bench + '.out'
     elif _bench == "401.bzip2":
         exe_binary = "bzip2" + exe_suffix
@@ -238,8 +238,8 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
         if _is_test == True:
             process.cmd = [exe_binary] + ['-d', 'foreman_test_encoder_baseline.cfg']
         else:
-            process.cmd = [exe_binary] + ['-d', 'foreman_ref_encoder_baseline.cfg']
-            # process.cmd = [exe_binary] + ['-d', 'foreman_ref_encoder_main.cfg']
+            # process.cmd = [exe_binary] + ['-d', 'foreman_ref_encoder_baseline.cfg']
+            process.cmd = [exe_binary] + ['-d', 'foreman_ref_encoder_main.cfg']
             # process.cmd = [exe_binary] + ['-d', 'sss_encoder_main.cfg']
         process.output = _bench + '.out'      
     elif _bench == "465.tonto":       

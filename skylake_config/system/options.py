@@ -101,3 +101,12 @@ def addOptions(parser):
         help="""Total number of instructions to
                                             simulate (default: run forever)""",
     )         
+    
+    parser.add_argument(
+        "--str_numcores",
+        action="store",
+        type=str,
+        default=1,
+        help="""Total number of instructions to
+                                            simulate (default: run forever)""",
+    )             

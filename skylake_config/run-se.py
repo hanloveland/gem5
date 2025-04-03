@@ -45,6 +45,7 @@ from options import *
 parser = argparse.ArgumentParser()
 addOptions(parser)
 args = parser.parse_args()
+np = int(args.str_numcores)
 
 # "../ext/ramulator2/ramulator2/ddr5_config.yaml"
 # "output_ramulator2.yaml"
@@ -57,9 +58,12 @@ class TestSystem(MySystem):
         exit(1)
     _ramulator2_config_path = args.ramulator2_config_path
     _ramulator2_output_path = args.ramulator2_output_path
+    _num_process = np
     if args.ramu_cap != None:
         _ramulator2_memory_capacity = int(args.ramu_cap.strip()) 
 
+
+# Set the number of process 
 system = TestSystem()
 if args.binary != "":
     print("Run Simple Binary File :",args.binary)
@@ -68,11 +72,12 @@ else:
     print("Run SPEC CPU 2006 Benchmark")
     print(" - set SPEC CPU Benchmark Path")
     print(" - Input is Test? : ",args.spec_bench_test)
-    system.setSpecBenmark(args.spec_path,args.spec_bench_test,args.spec_bench)
+    system.setSpecBenmark(args.spec_path,args.spec_bench_test,args.spec_bench,np)
 
 if args.str_maxinsts != None:
     max_inst = int(args.str_maxinsts.strip())
-    system.cpu.max_insts_any_thread = max_inst
+    for i in range(np):
+        system.cpu[i].max_insts_any_thread = max_inst
 
 root = Root(full_system = False, system = system)
 m5.instantiate()

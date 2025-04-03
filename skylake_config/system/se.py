@@ -47,6 +47,7 @@ class MySystem(System):
   _ramulator2_memory_capacity = 1
   _ramulator2_config_path = "" 
   _ramulator2_output_path = ""
+  _num_process = 1
 
   def __init__(self):
     super(MySystem, self).__init__()
@@ -56,7 +57,7 @@ class MySystem(System):
     self.clk_domain.voltage_domain = VoltageDomain()
 
     self.mem_mode = 'timing'
-    mem_size = '32GB'
+    mem_size = str(self._ramulator2_memory_capacity) + 'GB'
     # self.mem_ranges = [AddrRange('100MB'), # For kernel
     #                   AddrRange(0xC0000000, size=0x100000), # For I/0
     #                   AddrRange(Addr('4GB'), size = mem_size) # All data
@@ -66,8 +67,9 @@ class MySystem(System):
     self.mem_ranges = [AddrRange(Addr(mem_size), size = '100MB'),
                        AddrRange(mem_size)]    
 
-    self.cpu = self._CPUModel()
-    
+    # multi-process test
+    np = self._num_process
+    self.cpu = [self._CPUModel() for i in range(np)]
     # Create a memory bus
     self.membus = SystemXBar(width = 192)
     self.membus.badaddr_responder = BadAddr()
@@ -76,23 +78,26 @@ class MySystem(System):
     # Set up the system port for functional access from the simulator
     self.system_port = self.membus.cpu_side_ports
 
-    # Create an L1 instruction and data cache
-    self.cpu.icache = L1ICache()
-    self.cpu.dcache = L1DCache()
-    self.cpu.mmucache = MMUCache()
+    for i in range(np):
+      # Create an L1 instruction and data cache
+      self.cpu[i].icache = L1ICache()
+      self.cpu[i].dcache = L1DCache()
+      self.cpu[i].mmucache = MMUCache()
 
-    # Connect the instruction and data caches to the CPU
-    self.cpu.icache.connectCPU(self.cpu)
-    self.cpu.dcache.connectCPU(self.cpu)
-    self.cpu.mmucache.connectCPU(self.cpu)
+      # Connect the instruction and data caches to the CPU
+      self.cpu[i].icache.connectCPU(self.cpu[i])
+      self.cpu[i].dcache.connectCPU(self.cpu[i])
+      self.cpu[i].mmucache.connectCPU(self.cpu[i])
+
 
     # Create a memory bus, a coherent crossbar, in this case
     self.l2bus = L2XBar(width = 192)
 
-    # Hook the CPU ports up to the l2bus
-    self.cpu.icache.connectBus(self.l2bus)
-    self.cpu.dcache.connectBus(self.l2bus)
-    self.cpu.mmucache.connectBus(self.l2bus)
+    for i in range(np):
+      # Hook the CPU ports up to the l2bus
+      self.cpu[i].icache.connectBus(self.l2bus)
+      self.cpu[i].dcache.connectBus(self.l2bus)
+      self.cpu[i].mmucache.connectBus(self.l2bus)
 
     # Create an L2 cache and connect it to the l2bus
     self.l2cache = L2Cache()
@@ -112,27 +117,29 @@ class MySystem(System):
     # Connect the L3 cache to the membus
     self.l3cache.connectMemSideBus(self.membus)
 
-    # create the interrupt controller for the CPU
-    self.cpu.createInterruptController()
+    for i in range(np):
+      # create the interrupt controller for the CPU
+      self.cpu[i].createInterruptController()
 
-    self.cpu.interrupts[0].pio = self.membus.mem_side_ports
-    self.cpu.interrupts[0].int_requestor = self.membus.cpu_side_ports
-    self.cpu.interrupts[0].int_responder = self.membus.mem_side_ports
-
+      self.cpu[i].interrupts[0].pio = self.membus.mem_side_ports
+      self.cpu[i].interrupts[0].int_requestor = self.membus.cpu_side_ports
+      self.cpu[i].interrupts[0].int_responder = self.membus.mem_side_ports
     self.createMemoryControllersDDR4()
 
     # provide cache paramters for verbatim CPU
     if (self._CPUModel is VerbatimCPU):
-      # L1I-Cache
-      self.cpu.icache.size = '32kB'
-      self.cpu.icache.tag_latency = 4
-      self.cpu.icache.data_latency = 4
-      self.cpu.icache.response_latency = 1
-      # L1D-Cache
-      self.cpu.dcache.tag_latency = 4
-      self.cpu.dcache.data_latency = 4
-      self.cpu.dcache.response_latency = 1
+      for i in range(np):
+        # L1I-Cache
+        self.cpu[i].icache.size = '32kB'
+        self.cpu[i].icache.tag_latency = 4
+        self.cpu[i].icache.data_latency = 4
+        self.cpu[i].icache.response_latency = 1
+        # L1D-Cache
+        self.cpu[i].dcache.tag_latency = 4
+        self.cpu[i].dcache.data_latency = 4
+        self.cpu[i].dcache.response_latency = 1
 
+  # exit(1)
   # Memory latency: Using the smaller number from [3]: 96ns
   def createMemoryControllersDDR4(self):
     self._createMemoryControllers(1, DDR4_2400_16x4)
@@ -243,15 +250,17 @@ class MySystem(System):
   # 998.specrand
   # 999.specrand
 
-  def setSpecBenmark(self, spec_path, _is_test, bench):
+  def setSpecBenmark(self, spec_path, _is_test, bench, np):
     """Set up the SE process to execute the binary at binary_path"""
     from m5 import options
     print("SPEC CPU Path:",spec_path)
     
     exe_binary = spec_path + "/998.specrand/exe/specrand_base.none"
-    self.cpu.workload = set_spec_bench(spec_path, _is_test, bench, 100)
-    print(" -- process.cmd:",self.cpu.workload[0].cmd)
-    self.cpu.createThreads()
+    for i in range(np):
+      self.cpu[i].workload = set_spec_bench(spec_path, _is_test, bench, i*100)
+      print(" -- process.cmd:",self.cpu[i].workload[0].cmd)
+      self.cpu[i].createThreads()
+
     # print(self.cpu.workload)
-    process0_path = self.cpu.workload[0].executable
+    process0_path = self.cpu[0].workload[0].executable
     self.workload = SEWorkload.init_compatible(process0_path)    
