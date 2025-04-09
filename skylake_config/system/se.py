@@ -78,43 +78,45 @@ class MySystem(System):
     # Set up the system port for functional access from the simulator
     self.system_port = self.membus.cpu_side_ports
 
-    for i in range(np):
-      # Create an L1 instruction and data cache
-      self.cpu[i].icache = L1ICache()
-      self.cpu[i].dcache = L1DCache()
-      self.cpu[i].mmucache = MMUCache()
-
-      # Connect the instruction and data caches to the CPU
-      self.cpu[i].icache.connectCPU(self.cpu[i])
-      self.cpu[i].dcache.connectCPU(self.cpu[i])
-      self.cpu[i].mmucache.connectCPU(self.cpu[i])
-
-
-    # Create a memory bus, a coherent crossbar, in this case
-    self.l2bus = L2XBar(width = 192)
-
-    for i in range(np):
-      # Hook the CPU ports up to the l2bus
-      self.cpu[i].icache.connectBus(self.l2bus)
-      self.cpu[i].dcache.connectBus(self.l2bus)
-      self.cpu[i].mmucache.connectBus(self.l2bus)
-
-    # Create an L2 cache and connect it to the l2bus
-    self.l2cache = L2Cache()
-    self.l2cache.connectCPUSideBus(self.l2bus)
-
-    # Create a memory bus, a coherent crossbar, in this case
     self.l3bus = L2XBar(width = 192,
                         snoop_filter = SnoopFilter(max_capacity='32MB'))
+    
+    for cpu in self.cpu:
+      cpu.l2bus = L2XBar()
+      # Create an L1 instruction and data cache
+      cpu.icache = L1ICache()
+      cpu.dcache = L1DCache()
+      cpu.mmucache = MMUCache()
 
-    # Connect the L2 cache to the l3bus
-    self.l2cache.connectMemSideBus(self.l3bus)
+      # Connect the instruction and data caches to the CPU
+      cpu.icache.connectCPU(cpu)
+      cpu.dcache.connectCPU(cpu)
+      cpu.mmucache.connectCPU(cpu)      
+
+      # Hook the CPU ports up to the l2bus
+      cpu.icache.connectBus(cpu.l2bus)
+      cpu.dcache.connectBus(cpu.l2bus)
+      cpu.mmucache.connectBus(cpu.l2bus)         
+      
+      # Create an L2 cache and connect it to the l2bus
+      cpu.l2cache = L2Cache()
+      cpu.l2cache.connectCPUSideBus(cpu.l2bus)
+
+      # Connect the L2 cache to the L3 bus
+      cpu.l2cache.connectMemSideBus(self.l3bus)
 
     # Create an L3 cache and connect it to the l3bus
     self.l3cache = L3Cache()
+    if np == 1:
+      self.l3cache.size = '2MB'
+    elif np == 2:
+      self.l3cache.size = '4MB'
+    elif np == 4:
+      self.l3cache.size = '8MB'
+    elif np == 8:
+      self.l3cache.size = '16MB'
     self.l3cache.connectCPUSideBus(self.l3bus)
-
-    # Connect the L3 cache to the membus
+    #   # Connect the L3 cache to the membus
     self.l3cache.connectMemSideBus(self.membus)
 
     for i in range(np):
@@ -124,6 +126,7 @@ class MySystem(System):
       self.cpu[i].interrupts[0].pio = self.membus.mem_side_ports
       self.cpu[i].interrupts[0].int_requestor = self.membus.cpu_side_ports
       self.cpu[i].interrupts[0].int_responder = self.membus.mem_side_ports
+      
     self.createMemoryControllersDDR4()
 
     # provide cache paramters for verbatim CPU
@@ -131,12 +134,15 @@ class MySystem(System):
       for i in range(np):
         # L1I-Cache
         self.cpu[i].icache.size = '32kB'
-        self.cpu[i].icache.tag_latency = 4
-        self.cpu[i].icache.data_latency = 4
+        self.cpu[i].icache.assoc = 8
+        self.cpu[i].icache.tag_latency = 1
+        self.cpu[i].icache.data_latency = 1
         self.cpu[i].icache.response_latency = 1
         # L1D-Cache
-        self.cpu[i].dcache.tag_latency = 4
-        self.cpu[i].dcache.data_latency = 4
+        self.cpu[i].dcache.size = '32kB'
+        self.cpu[i].dcache.assoc = 8
+        self.cpu[i].dcache.tag_latency = 1
+        self.cpu[i].dcache.data_latency = 1
         self.cpu[i].dcache.response_latency = 1
 
   # exit(1)

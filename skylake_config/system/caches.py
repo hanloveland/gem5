@@ -41,12 +41,14 @@ from m5.util.convert import toMemorySize
 
 # Some specific options for caches
 # For all options see src/mem/cache/BaseCache.py
+# Update (https://github.com/darchr/gem5-skylake-config/blob/master/configuration-details.md)
 
 class PrefetchCache(Cache):
 
     def __init__(self):
         super(PrefetchCache, self).__init__()
-        self.prefetcher = PIFPrefetcher()
+        self.prefetcher = StridePrefetcher()
+        # self.prefetcher = PIFPrefetcher()
         self.replacement_policy = TreePLRURP()
         self.prefetch_on_access = True
 
@@ -147,12 +149,23 @@ class L2Cache(PrefetchCache):
 
     size = '1MB'
     assoc = 16
-    tag_latency = 14
-    data_latency = 14
-    response_latency = 1
-    mshrs = 256
-    tgts_per_mshr = 16
-    write_buffers = 256
+    tag_latency = 12
+    data_latency = 12
+    response_latency = 6
+    mshrs = 32
+    tgts_per_mshr = 1
+    write_buffers = 32
+
+    clusivity = 'mostly_incl'
+    # Old
+    # size = '1MB'
+    # assoc = 16
+    # tag_latency = 14
+    # data_latency = 14
+    # response_latency = 1
+    # mshrs = 256
+    # tgts_per_mshr = 16
+    # write_buffers = 256
 
     def __init__(self):
         super(L2Cache, self).__init__()
@@ -170,14 +183,24 @@ class L3Cache(PrefetchCache):
     """
 
     # Default parameters
-    size = '2MB'
+    # size = '2MB'
+    # size = '19.5MB'
+    size = '4MB'
     assoc = 16
     tag_latency = 44
     data_latency = 44
-    response_latency = 1
-    mshrs = 256
-    tgts_per_mshr = 16
-    write_buffers = 256
+    response_latency = 21
+    mshrs = 32
+    tgts_per_mshr = 2
+    write_buffers = 64
+    # size = '2MB'
+    # assoc = 16
+    # tag_latency = 44
+    # data_latency = 44
+    # response_latency = 1
+    # mshrs = 256
+    # tgts_per_mshr = 16
+    # write_buffers = 256    
 
     clusivity = 'mostly_excl'
 
