@@ -68,11 +68,17 @@ system = TestSystem()
 if args.binary != "":
     print("Run Simple Binary File :",args.binary)
     system.setTestBinary(args.binary)
+elif args.poly_bench != "":
+    print("Run Polybenchmark :",args.poly_bench)
+    system.setPolyBenchmark(args.poly_bench,np)      
+elif args.mibench != "":
+    print("Run Mibench :",args.mibench)
+    system.setMibench(args.mibench,np)              
 else:
     print("Run SPEC CPU 2006 Benchmark")
     print(" - set SPEC CPU Benchmark Path")
     print(" - Input is Test? : ",args.spec_bench_test)
-    system.setSpecBenmark(args.spec_path,args.spec_bench_test,args.spec_bench,np)
+    system.setSpecBenchmark(args.spec_path,args.spec_bench_test,args.spec_bench,np)
 
 if args.str_maxinsts != None:
     max_inst = int(args.str_maxinsts.strip())

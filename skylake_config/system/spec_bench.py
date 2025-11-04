@@ -328,3 +328,90 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
         exit(1)
 
     return process
+
+
+def set_mibench(_bench,_pid):
+    if _bench == "basicmath":
+        exe_binary = "basicmath_large"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary]
+        process.output = _bench + '.out'
+    elif _bench == "bitcount":
+        exe_binary = "bitcnts"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary] + ['1125000']
+        process.output = _bench + '.out'  
+    elif _bench == "qsort":
+        exe_binary = "qsort_large"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary] + ['input_large.dat']
+        process.output = _bench + '.out'        
+    elif _bench == "susan":
+        exe_binary = "susan"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary] + ['input_large.pgm', 'output_large.smoothing.pgm','-s']
+        process.output = _bench + '.out'        
+    elif _bench == "blowfish":
+        exe_binary = "bf"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary] + ['e','input_large.asc','output_large.enc','1234567890abcdeffedcba0987654321']
+        process.output = _bench + '.out'      
+    elif _bench == "rijndael":
+        exe_binary = "rijndael"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary] + ['input_large.asc', 'output_large.enc', 'e', '1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321']
+        process.output = _bench + '.out'         
+    elif _bench == "sha":
+        exe_binary = "sha"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary] + ['input_large.asc']
+        process.output = _bench + '.out'        
+    elif _bench == "dijkstra":
+        exe_binary = "dijkstra_large"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary] + ['input.dat']
+        process.output = _bench + '.out'           
+    elif _bench == "patricia":
+        exe_binary = "patricia"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary] + ['large.udp']
+        process.output = _bench + '.out'              
+    elif _bench == "adpcm":
+        exe_binary = "rawcaudio"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary] + ['<','large.pcm']
+        process.output = _bench + '.out'          
+    elif _bench == "CRC32":
+        exe_binary = "crc"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary] + ['../adpcm/data/large.pcm']
+        process.output = _bench + '.out' 
+    elif _bench == "FFT":
+        exe_binary = "fft"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary] + ['8', '32768']
+        process.output = _bench + '.out'   
+    elif _bench == "gsm":
+        exe_binary = "bin/toast"
+        process = Process(pid=_pid)
+        process.executable = exe_binary
+        process.cmd = [exe_binary] + ['-fps', '-c', 'data/large.au']
+        process.output = _bench + '.out'            
+    else: 
+        print("Wrong Mibench")
+        exit(1)
+
+    return process
+    

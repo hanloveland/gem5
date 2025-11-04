@@ -220,10 +220,10 @@ class MySystem(System):
   def setTestBinary(self, binary_path):
     """Set up the SE process to execute the binary at binary_path"""
     from m5 import options
-    self.cpu.workload = Process(
+    self.cpu[0].workload = Process(
                       cmd = [binary_path], executable = binary_path)
-    self.cpu.createThreads()
-    process0_path = self.cpu.workload[0].executable
+    self.cpu[0].createThreads()
+    process0_path = self.cpu[0].workload[0].executable
     self.workload = SEWorkload.init_compatible(process0_path)
 
   # Working SPEC CPU Benchmark List
@@ -256,12 +256,11 @@ class MySystem(System):
   # 998.specrand
   # 999.specrand
 
-  def setSpecBenmark(self, spec_path, _is_test, bench, np):
+  def setSpecBenchmark(self, spec_path, _is_test, bench, np):
     """Set up the SE process to execute the binary at binary_path"""
     from m5 import options
     print("SPEC CPU Path:",spec_path)
     
-    exe_binary = spec_path + "/998.specrand/exe/specrand_base.none"
     for i in range(np):
       self.cpu[i].workload = set_spec_bench(spec_path, _is_test, bench, i*100)
       print(" -- process.cmd:",self.cpu[i].workload[0].cmd)
@@ -270,3 +269,31 @@ class MySystem(System):
     # print(self.cpu.workload)
     process0_path = self.cpu[0].workload[0].executable
     self.workload = SEWorkload.init_compatible(process0_path)    
+
+  def setPolyBenchmark(self, bench, np):
+    """Set up the SE process to execute PolyBench"""
+    from m5 import options
+    
+    for i in range(np):
+      self.cpu[i].workload = Process(
+                      cmd = [bench], executable = bench)
+      print(" -- process.cmd:",self.cpu[i].workload[0].cmd)
+      self.cpu[i].createThreads()
+
+    # print(self.cpu.workload)
+    process0_path = self.cpu[0].workload[0].executable
+    self.workload = SEWorkload.init_compatible(process0_path)     
+
+  def setMibench(self, bench, np):
+    """Set up the SE process to execute the Mibench"""
+    from m5 import options
+    for i in range(np):
+      self.cpu[i].workload = set_mibench(bench,i*100)
+      print(" -- process.cmd:",self.cpu[i].workload[0].cmd)
+      self.cpu[i].createThreads()
+
+    # print(self.cpu.workload)
+    process0_path = self.cpu[0].workload[0].executable
+    self.workload = SEWorkload.init_compatible(process0_path)     
+
+    

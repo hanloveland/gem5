@@ -33,6 +33,19 @@ benchmark_choices = [
     "999.specrand",
 ]
 
+polybench_choice = [
+    "covariance", "2mm", "3mm", "atax", "bicg", "doitgen", "mvt", "gemm",
+    "gemver", "gesummv", "symm", "syr2k", "syrk", "trmm", "durbin", "lu",
+    "ludcmp", "trisolv", "deriche",  "floyd-warshall", "nussinov", "adi",
+    "fdtd-2d", "heat-3d", "jacobi-1d", "jacobi-2d", "seidel-2d", "cholesky",
+    "gramschmidt", "correlation"
+]
+
+mibench_choice = [
+    "basicmath", "bitcount", "qsort", "susan", "blowfish", "rijndael", "sha",
+    "dijkstra", "patricia", "adpcm", "CRC32", "FFT", "gsm"
+]
+
 def addOptions(parser):
     parser.add_argument(
         "--binary", 
@@ -52,7 +65,8 @@ def addOptions(parser):
         dest="spec_bench", 
         type = str, 
         choices=benchmark_choices,
-        help = "Input the becnhamrk progream to execute")    
+        default="",
+        help = "Input the benchmark program (SPEC CPU 2006) to execute")    
     
     parser.add_argument(
         '--spec_bench_test', 
@@ -60,6 +74,27 @@ def addOptions(parser):
         default=False,
         help = "Test SPEC CPU Benchmark input is Test")        
     
+    parser.add_argument(
+        '--poly_path', 
+        type = str, 
+        help = "Path to polybench")
+
+    parser.add_argument(
+        '--poly_bench', 
+        dest="poly_bench", 
+        type = str, 
+        choices=polybench_choice,
+        default="",
+        help = "Input the benchmark program (polybench) to execute") 
+
+    parser.add_argument(
+        '--mibench', 
+        dest="mibench", 
+        type = str, 
+        choices=mibench_choice,
+        default="",
+        help = "Input the benchmark program (mibench) to execute") 
+
     parser.add_argument(
         '--ramu_config', 
         type = str, 
