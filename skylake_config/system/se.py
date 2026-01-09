@@ -276,7 +276,7 @@ class MySystem(System):
     
     for i in range(np):
       self.cpu[i].workload = Process(
-                      cmd = [bench], executable = bench)
+                      cmd = [bench], executable = bench, pid=(i*100))
       print(" -- process.cmd:",self.cpu[i].workload[0].cmd)
       self.cpu[i].createThreads()
 
