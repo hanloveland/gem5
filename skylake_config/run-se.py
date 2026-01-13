@@ -47,6 +47,51 @@ addOptions(parser)
 args = parser.parse_args()
 np = int(args.str_numcores)
 
+def get_core_ipc(cpu, start_tick, end_tick, clock_period):
+    """
+    IPC = Instructions / Cycles
+    Cycles = (end_tick - start_tick) / clock_period
+    """
+    insts = cpu.totalInsts()
+    ticks = end_tick - start_tick
+    cycles = ticks / int(clock_period)
+    
+    if cycles > 0:
+        ipc = insts / cycles
+    else:
+        ipc = 0.0
+    
+    return ipc, insts, cycles
+
+def check_and_handle_completion(cause, start_tick, end_tick):
+    """Check Each Core is Done or not, and record"""
+    global done_cnt
+    
+    for i, cpu in enumerate(system.cpu):
+        if core_done[i]:
+            continue
+            
+        insts = cpu.totalInsts()
+        
+        if insts >= TARGET_INSTS:
+            core_done[i] = True
+            core_insts_at_done[i] = insts
+            done_cnt += 1
+
+            clock_period = float(cpu.clk_domain.clock[0]) / 1e-12
+            ipc, insts, cycles = get_core_ipc(cpu, start_tick, end_tick, clock_period)
+            core_ipc_at_done[i] = ipc
+            core_cycles_at_done[i] = cycles
+            print(f"Core {i}: IPC={ipc:.4f}, Insts={insts:,}, Cycles={cycles:,.0f}")
+
+    if "exiting with last active thread context" in cause and done_cnt < num_cores:
+        for i, cpu in enumerate(system.cpu):
+            if not core_done[i]:
+                try:
+                    cpu.workload[0].rewind()
+                except:
+                    pass
+
 # "../ext/ramulator2/ramulator2/ddr5_config.yaml"
 # "output_ramulator2.yaml"
 class TestSystem(MySystem):
@@ -62,6 +107,14 @@ class TestSystem(MySystem):
     if args.ramu_cap != None:
         _ramulator2_memory_capacity = int(args.ramu_cap.strip()) 
 
+    if args.spec_path != "":
+        _spec_cpu_path = args.spec_path
+
+    if args.poly_path != "":
+        _polybench_path = args.poly_path
+
+    if args.run_path != "":
+        _run_path = args.run_path
 
 # Set the number of process 
 system = TestSystem()
@@ -74,21 +127,63 @@ elif args.poly_bench != "":
 elif args.mibench != "":
     print("Run Mibench :",args.mibench)
     system.setMibench(args.mibench,np)              
-else:
+elif args.spec_bench != "":
     print("Run SPEC CPU 2006 Benchmark")
     print(" - set SPEC CPU Benchmark Path")
     print(" - Input is Test? : ",args.spec_bench_test)
-    system.setSpecBenchmark(args.spec_path,args.spec_bench_test,args.spec_bench,np)
+    system.setSpecBenchmark(args.spec_bench_test,args.spec_bench,np)
+elif args.mix_bench != "":
+    print(system._run_path)
+    print("Run Mix (SPEC CPU + Polybench) Benchmark {}",args.mix_bench)
+    system.setMixbench(args.mix_bench,np)
+else:
+    print("Not Supported Workload!!")
+    exit(1)
 
 if args.str_maxinsts != None:
     max_inst = int(args.str_maxinsts.strip())
     for i in range(np):
         system.cpu[i].max_insts_any_thread = max_inst
 
+TARGET_INSTS = max_inst
+if max_inst == int(10e8):
+    QUANTUM_TICKS = int(10e6)  
+else:
+    QUANTUM_TICKS = int(max_inst/100)
+
+num_cores = len(system.cpu)
+core_done = [False] * num_cores
+core_insts_at_done = [0] * num_cores   
+core_ipc_at_done = [0] * num_cores     
+core_cycles_at_done = [0] * num_cores  
+
 root = Root(full_system = False, system = system)
 m5.instantiate()
 
-exit_event = m5.simulate()
+done_cnt = 0
+iteration = 0
+
+print(f"Starting simulation: {num_cores} cores, target {TARGET_INSTS:,} insts each")
+print(f"Polling quantum: {QUANTUM_TICKS:,} ticks")
+print("-" * 60)
+
+start_tick = m5.curTick()
+
+while done_cnt < num_cores:
+    iteration += 1
+    exit_event = m5.simulate(QUANTUM_TICKS)
+    cause = exit_event.getCause()
+    check_and_handle_completion(cause, start_tick, m5.curTick())
+
+    if done_cnt == num_cores:
+        break    
+
+print("-" * 60)
+print("Simulation completed!")
+print(f"Total iterations: {iteration}")
+for i in range(num_cores):
+    print(f"  core {i}: {core_insts_at_done[i]:,} instructions {core_cycles_at_done[i]:,.0f} cycles --> IPC {core_ipc_at_done[i]:.4f}")
+
 
 if exit_event.getCause() != 'exiting with last active thread context':
     print("Benchmark failed with bad exit cause.")

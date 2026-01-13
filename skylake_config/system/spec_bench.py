@@ -2,12 +2,60 @@
 import m5
 from m5.objects import *
 from os import chdir
+import shutil
+from pathlib import Path
 
 exe_suffix = "_base.none"
 
-def set_spec_bench(_spec_path,_is_test,_bench,_pid):
+benchmark_list = [
+    "400.perlbench",
+    "401.bzip2",
+    "403.gcc",
+    "410.bwaves",
+    "416.gamess",
+    "429.mcf",
+    "433.milc",
+    "434.zeusmp",
+    "435.gromacs",
+    "436.cactusADM",
+    "437.leslie3d",
+    "444.namd",
+    "445.gobmk",
+    "450.soplex",
+    "453.povray",
+    "454.calculix",
+    "456.hmmer",
+    "458.sjeng",
+    "459.GemsFDTD",
+    "462.libquantum",
+    "464.h264ref",
+    "465.tonto",
+    "470.lbm",
+    "471.omnetpp",
+    "473.astar",
+    "481.wrf",
+    "482.sphinx3",
+    "483.xalancbmk",
+    "998.specrand",
+    "999.specrand",
+]
+
+poly_datamining_list = [ "correlation", "covariance" ]
+poly_kernel_list = [ "2mm", "3mm", "atax", "bicg", "doitgen", "mvt"]
+poly_blas_list = [ "gemm", "gemver", "gesummv", "symm", "syr2k", "syrk", "trmm"]
+poly_solver_list = [ "durbin", "lu", "ludcmp", "trisolv", "cholesky", "gramschmidt" ]
+poly_medley_list = [ "deriche", "floyd-warshall", "nussinov" ]
+poly_stencil_list = [ "adi", "fdtd-2d", "heat-3d", "jacobi-1d", "jacobi-2d", "seidel-2d" ]
+
+mibench_automotive_list = ["basicmath", "bitcount", "qsort", "susan"] 
+mibench_security_list = ["blowfish", "rijndael", "sha"]
+mibench_network_list = ["dijkstra","patricia"]
+mibench_telecomm_list = ["CRC32","FFT","gsm"] 
+
+def set_spec_bench(_spec_path,_is_test,_bench,_pid,_run_path=""):
+    shutil.copytree(_spec_path, _run_path, dirs_exist_ok=True)
     if _bench == "400.perlbench":
-        exe_binary = "perlbench" + exe_suffix
+        exe_binary = _run_path + "/" + "perlbench" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
@@ -16,9 +64,11 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
             # process.cmd = [exe_binary] + ['-I./lib', 'checkspam.pl', '2500', '5', '25', '11', '150', '1', '1', '1', '1']
             # process.cmd = [exe_binary] + ['-I./lib', 'diffmail.pl', '4', '800', '10', '17', '19', '300']
             process.cmd = [exe_binary] + ['-I./lib', 'splitmail.pl', '1600', '12', '26', '16', '4500']
-        process.output = _bench + '.out'
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"
     elif _bench == "401.bzip2":
-        exe_binary = "bzip2" + exe_suffix
+        exe_binary = _run_path + "/" + "bzip2" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
@@ -30,9 +80,11 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
             # process.cmd = [exe_binary] + ['input.program', '280']
             # process.cmd = [exe_binary] + ['input.program', '280']
             # process.cmd = [exe_binary] + ['text.html', '280']
-        process.output = _bench + '.out'        
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"     
     elif _bench == "403.gcc":
-        exe_binary = "gcc" + exe_suffix
+        exe_binary = _run_path + "/" + "gcc" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
@@ -49,122 +101,147 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
             #process.cmd = [exe_binary] + ['scilab.in', '-o', 'scilab.s']            
         process.output = _bench + '.out'          
     elif _bench == "410.bwaves":
-        exe_binary = "bwaves" + exe_suffix
+        exe_binary = _run_path + "/" + "bwaves" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary]
         else:
             process.cmd = [exe_binary]
-        process.output = _bench + '.out'          
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"     
     elif _bench == "416.gamess":
         print("Error - Not Working")
-        exe_binary = "gamess" + exe_suffix
+        exe_binary = _run_path + "/" + "gamess" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary       
         if _is_test == True:
             process.cmd = [exe_binary]
-            process.input = 'exam29.config'
+            process.input = f"{_run_path}/exam29.config"
         else:
             process.cmd = [exe_binary]
-            process.input = 'h2ocu2+.gradient.config'
+            process.input = f"{_run_path}/h2ocu2+.gradient.config"
             # process.input = 'triazolium.config'
-        process.output = _bench + '.out'           
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"          
     elif _bench == "429.mcf":
-        exe_binary = "mcf" + exe_suffix
+        exe_binary = _run_path + "/" + "mcf" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['inp.in']
         else:
             process.cmd = [exe_binary] + ['inp.in']
-        process.output = _bench + '.out'              
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"                
     elif _bench == "433.milc":
-        exe_binary = "milc" + exe_suffix
+        exe_binary = _run_path + "/" + "milc" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] 
-            process.input = 'su3imp.in'
+            process.input = f"{_run_path}/su3imp.in"
         else:
             process.cmd = [exe_binary] 
-            process.input = 'su3imp.in'
-        process.output = _bench + '.out'  
+            process.input = f"{_run_path}/su3imp.in"
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"            
     elif _bench == "434.zeusmp":
-        exe_binary = "zeusmp" + exe_suffix
+        exe_binary = _run_path + "/" + "zeusmp" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] 
         else:
             process.cmd = [exe_binary] 
-        process.output = _bench + '.out'           
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"      
     elif _bench == "435.gromacs":
-        exe_binary = "gromacs" + exe_suffix
+        exe_binary = _run_path + "/" + "gromacs" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['-silent','-deffnm', 'gromacs', '-nice','0']
         else:
             process.cmd = [exe_binary] + ['-silent','-deffnm', 'gromacs', '-nice','0']
-        process.output = _bench + '.out'           
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"             
     elif _bench == "436.cactusADM":
         print("Error - Not Working")
         exit(1)
-        exe_binary = "cactusADM" + exe_suffix
+        exe_binary = _run_path + "/" + "cactusADM" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['benchADM.par']
         else:
             process.cmd = [exe_binary] + ['benchADM.par']
-        process.output = _bench + '.out'    
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"  
     elif _bench == "437.leslie3d":
-        exe_binary = "leslie3d" + exe_suffix
+        exe_binary = _run_path + "/" + "leslie3d" + exe_suffix
+        # exe_binary = "leslie3d" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary]
-            process.input = 'leslie3d.in'
+            process.input = f"{_run_path}/leslie3d.in"
         else:
             process.cmd = [exe_binary]
-            process.input = 'leslie3d.in'
-        process.output = _bench + '.out'    
+            process.input = f"{_run_path}/leslie3d.in"
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt" 
+        # process.output = f"stdout.txt"
+        # process.errout = f"stderr.txt"         
     elif _bench == "444.namd":
-        exe_binary = "namd" + exe_suffix
+        exe_binary = _run_path + "/" + "namd" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['--input', 'namd.input', '--output', 'namd.out', '--iterations', '1']
         else:
             process.cmd = [exe_binary] + ['--input', 'namd.input', '--output', 'namd.out', '--iterations', '38']
-        process.output = _bench + '.out'     
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"        
     elif _bench == "445.gobmk":
-        exe_binary = "gobmk" + exe_suffix
+        exe_binary = _run_path + "/" + "gobmk" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['--quiet','--mode', 'gtp']
-            process.input = 'dniwog.tst'
+            process.input = f"{_run_path}/dniwog.tst"
         else:
             process.cmd = [exe_binary] + ['--quiet','--mode', 'gtp']
-            process.input = '13x13.tst'
+            process.input = f"{_run_path}/13x13.tst"
             # process.input = 'nngs.tst'
             # process.input = 'score2.tst'
             # process.input = 'trevorc.tst'
             # process.input = 'trevord.tst'            
-        process.output = _bench + '.out'       
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"             
     elif _bench == "447.dealII":      
-        exe_binary = "dealII" + exe_suffix
+        exe_binary = _run_path + "/" + "dealII" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['8']
         else:
-            process.cmd = [exe_binary] + ['23']
-        process.output = _bench + '.out'                                                   
+            process.cmd = [exe_binary] + ['23']               
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"                                  
     elif _bench == "450.soplex":     
-        exe_binary = "soplex" + exe_suffix
+        exe_binary = _run_path + "/" + "soplex" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
@@ -172,9 +249,11 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
         else:
             process.cmd = [exe_binary] + ['-m45000', 'pds-50.mps']
             # process.cmd = [exe_binary] + ['-m3500', 'ref.mps']
-        process.output = _bench + '.out'   
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"
     elif _bench == "453.povray":          
-        exe_binary = "povray" + exe_suffix
+        exe_binary = _run_path + "/" + "povray" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
@@ -183,16 +262,18 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
             process.cmd = [exe_binary] + ['SPEC-benchmark-ref.ini']
         process.output = _bench + '.out'       
     elif _bench == "454.calculix":            
-        exe_binary = "calculix" + exe_suffix
+        exe_binary = _run_path + "/" + "calculix" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['-i', 'beampic']
         else:
             process.cmd = [exe_binary] + ['-i', 'hyperviscoplastic']
-        process.output = _bench + '.out'    
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"
     elif _bench == "456.hmmer":
-        exe_binary = "hmmer" + exe_suffix
+        exe_binary = _run_path + "/" + "hmmer" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
@@ -200,9 +281,11 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
         else:
             process.cmd = [exe_binary] + ['nph3.hmm', 'swiss41']
             # process.cmd = [exe_binary] + ['--fixed', '0', '--mean', '500', '--num', '500000', '--sd', '350', '--seed', '0', 'retro.hmm']
-        process.output = _bench + '.out' 
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"
     elif _bench == "458.sjeng":
-        exe_binary = "sjeng" + exe_suffix
+        exe_binary = _run_path + "/" + "sjeng" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
@@ -210,7 +293,9 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
         else:
             process.cmd = [exe_binary] + ['ref.txt']
             # process.cmd = [exe_binary] + ['--fixed', '0', '--mean', '500', '--num', '500000', '--sd', '350', '--seed', '0', 'retro.hmm']
-        process.output = _bench + '.out' 
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"
     elif _bench == "459.GemsFDTD":
         print("Need check whether it is workingor not")
         exit(1)              
@@ -221,18 +306,22 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
             process.cmd = [exe_binary]
         else:
             process.cmd = [exe_binary]
-        process.output = _bench + '.out'           
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"      
     elif _bench == "462.libquantum":
-        exe_binary = "libquantum" + exe_suffix
+        exe_binary = _run_path + "/" + "libquantum" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['33','5']
         else:
             process.cmd = [exe_binary] + ['1397','8']
-        process.output = _bench + '.out'   
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"
     elif _bench == "464.h264ref":
-        exe_binary = "h264ref" + exe_suffix
+        exe_binary = _run_path + "/" + "h264ref" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
@@ -241,27 +330,33 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
             # process.cmd = [exe_binary] + ['-d', 'foreman_ref_encoder_baseline.cfg']
             process.cmd = [exe_binary] + ['-d', 'foreman_ref_encoder_main.cfg']
             # process.cmd = [exe_binary] + ['-d', 'sss_encoder_main.cfg']
-        process.output = _bench + '.out'      
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"      
     elif _bench == "465.tonto":       
-        exe_binary = "tonto" + exe_suffix
+        exe_binary = _run_path + "/" + "tonto" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary]
         else:
             process.cmd = [exe_binary]
-        process.output = _bench + '.out'      
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"            
     elif _bench == "470.lbm":           
-        exe_binary = "lbm" + exe_suffix
+        exe_binary = _run_path + "/" + "lbm" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['20', 'reference.dat', '0', '1', '100_100_130_cf_a.of']
         else:
             process.cmd = [exe_binary] + ['300', 'reference.dat', '0', '0', '100_100_130_ldc.of']           
-        process.output = _bench + '.out'     
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"        
     elif _bench == "471.omnetpp":
-        exe_binary = "omnetpp" + exe_suffix
+        exe_binary = _run_path + "/" + "omnetpp" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
@@ -270,59 +365,71 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid):
             process.cmd = [exe_binary] + ['omnetpp.ini']
         process.output = _bench + '.out'          
     elif _bench == "473.astar":
-        exe_binary = "astar" + exe_suffix
+        exe_binary = _run_path + "/" + "astar" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['lake.cfg']
         else:
-            process.cmd = [exe_binary] + ['rivers.cfg']
-        process.output = _bench + '.out'             
+            process.cmd = [exe_binary] + ['rivers.cfg']   
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"        
     elif _bench == "481.wrf":             
-        exe_binary = "wrf" + exe_suffix
+        exe_binary = _run_path + "/" + "wrf" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary]
         else:
             process.cmd = [exe_binary]
-        process.output = _bench + '.out'       
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"
     elif _bench == "482.sphinx3": 
-        exe_binary = "sphinx_livepretend" + exe_suffix
+        exe_binary = _run_path + "/" + "sphinx_livepretend" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['ctlfile', '.', 'args.an4']
         else:
             process.cmd = [exe_binary] + ['ctlfile', '.', 'args.an4']
-        process.output = _bench + '.out'    
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt" 
     elif _bench == "483.xalancbmk":
-        exe_binary = "Xalan" + exe_suffix
+        exe_binary = _run_path + "/" + "Xalan" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['-v','test.xml','xalanc.xsl']
         else:
             process.cmd = [exe_binary] + ['-v','t5.xml','xalanc.xsl']
-        process.output = _bench + '.out'                                                                                      
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"                                                                                            
     elif _bench == "998.specrand":
-        exe_binary = "specrand" + exe_suffix
+        exe_binary = _run_path + "/" + "specrand" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['324342', '24239']
         else:
             process.cmd = [exe_binary] + ['1255432124', '234923']
-        process.output = _bench + '.out'  
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"
     elif _bench == "999.specrand":
-        exe_binary = "specrand" + exe_suffix
+        exe_binary = _run_path + "/" + "specrand" + exe_suffix
         process = Process(pid=_pid)
         process.executable = exe_binary
         if _is_test == True:
             process.cmd = [exe_binary] + ['324342', '24239']
         else:
             process.cmd = [exe_binary] + ['1255432124', '234923']
-        process.output = _bench + '.out'         
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"
     else: 
         print("Wrong SPEC CPU Benchmark!")
         exit(1)
@@ -414,4 +521,60 @@ def set_mibench(_bench,_pid):
         exit(1)
 
     return process
+
+def set_polybench(_poly_path,_bench,_pid,_run_path=""):
+    shutil.copytree(_poly_path, _run_path, dirs_exist_ok=True)
+    exe_binary = _run_path + "/" + _bench
+    process = Process(pid=_pid)
+    process.executable = exe_binary
+    process.cmd = [exe_binary]
+    process.cwd = _run_path
+    process.output = f"{_run_path}/stdout.txt"
+    process.errout = f"{_run_path}/stderr.txt"
+
+    return process
+
+def get_spec_bench_path(_spec_path,_bench,_is_test):
+    if _bench in benchmark_list:
+        if _is_test:
+            run_path = _spec_path + "/" + _bench + "/run/run_base_test_none.0000/"            
+        else: 
+            run_path = _spec_path + "/" + _bench + "/run/run_base_ref_none.0000/"            
+        return run_path    
+    else: 
+        print("Wrong SPEC CPU Benchmark!")
+        exit(1)
+
+def get_poly_bench_path(_poly_path,_bench):
+    if _bench in poly_datamining_list:
+        run_path = _poly_path + "/" + "datamining/" + _bench
+    elif _bench in poly_kernel_list:
+        run_path = _poly_path + "/" + "linear-algebra/kernels/" + _bench
+    elif _bench in poly_blas_list:
+        run_path = _poly_path + "/" + "linear-algebra/blas/" + _bench       
+    elif _bench in poly_solver_list:
+        run_path = _poly_path + "/" + "linear-algebra/solvers/" + _bench             
+    elif _bench in poly_medley_list:
+        run_path = _poly_path + "/" + "medley/" + _bench      
+    elif _bench in poly_stencil_list:
+        run_path = _poly_path + "/" + "stencils/" + _bench           
+    else: 
+        print("Wrong PolyBench!!")
+        exit(1)
+    return run_path
     
+def get_mibench_path(_mibench_path,_bench):
+    if _bench in mibench_automotive_list:
+        run_path = _mibench_path + "/" + "automotive/" + _bench    
+    elif _bench in mibench_security_list:
+        run_path = _mibench_path + "/" + "security/" + _bench  
+    elif _bench in mibench_network_list:
+        run_path = _mibench_path + "/" + "network/" + _bench  
+    elif _bench in mibench_telecomm_list:
+        run_path = _mibench_path + "/" + "telecomm/" + _bench       
+    elif _bench == "adpcm":
+        run_path = _mibench_path + "/" + "telecomm/" + _bench + "/bin"
+    else: 
+        print(f"{_bench} is not Mibench!!")
+        exit(1)
+    return run_path    

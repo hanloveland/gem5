@@ -54,10 +54,17 @@ def addOptions(parser):
         type = str, 
         default ="", 
         help = "Path to binary to run")
-    
+
+    parser.add_argument(
+        '--run_path', 
+        type = str, 
+        default="",
+        help = "Path to run Workload")
+
     parser.add_argument(
         '--spec_path', 
         type = str, 
+        default="",
         help = "Path to spec cpu 2006")
     
     parser.add_argument(
@@ -77,6 +84,7 @@ def addOptions(parser):
     parser.add_argument(
         '--poly_path', 
         type = str, 
+        default="",
         help = "Path to polybench")
 
     parser.add_argument(
@@ -94,6 +102,13 @@ def addOptions(parser):
         choices=mibench_choice,
         default="",
         help = "Input the benchmark program (mibench) to execute") 
+
+    parser.add_argument(
+        '--mix_bench', 
+        dest="mix_bench", 
+        type = str, 
+        default="",
+        help = "Input the benchmark program (mixed workload) to execute") 
 
     parser.add_argument(
         '--ramu_config', 

@@ -40,6 +40,27 @@ sys.path.append(GEM5_CONF_PATH)
 from common import ObjectList
 from spec_bench import *
 
+spec_benchmark_list = [
+  "400.perlbench","401.bzip2","403.gcc","410.bwaves","416.gamess","429.mcf","433.milc",
+  "434.zeusmp","435.gromacs","436.cactusADM","437.leslie3d","444.namd","445.gobmk",
+  "450.soplex","453.povray","454.calculix","456.hmmer","458.sjeng","459.GemsFDTD","462.libquantum",
+  "464.h264ref","465.tonto","470.lbm","471.omnetpp","473.astar","481.wrf","482.sphinx3","483.xalancbmk",
+  "998.specrand","999.specrand"
+]
+
+polybench_list = [
+  "covariance", "2mm", "3mm", "atax", "bicg", "doitgen", "mvt", "gemm",
+  "gemver", "gesummv", "symm", "syr2k", "syrk", "trmm", "durbin", "lu",
+  "ludcmp", "trisolv", "deriche",  "floyd-warshall", "nussinov", "adi",
+  "fdtd-2d", "heat-3d", "jacobi-1d", "jacobi-2d", "seidel-2d", "cholesky",
+  "gramschmidt", "correlation"
+]
+
+mibench_list = [
+  "basicmath", "bitcount", "qsort", "susan", "blowfish", "rijndael", "sha",
+  "dijkstra", "patricia", "adpcm", "CRC32", "FFT", "gsm"
+]
+
 class MySystem(System):
 
   _CPUModel = BaseCPU
@@ -48,6 +69,9 @@ class MySystem(System):
   _ramulator2_config_path = "" 
   _ramulator2_output_path = ""
   _num_process = 1
+  _spec_cpu_path = ""
+  _polybench_path = ""
+  _run_path = ""
 
   def __init__(self):
     super(MySystem, self).__init__()
@@ -256,13 +280,15 @@ class MySystem(System):
   # 998.specrand
   # 999.specrand
 
-  def setSpecBenchmark(self, spec_path, _is_test, bench, np):
+  def setSpecBenchmark(self, _is_test, bench, np):
     """Set up the SE process to execute the binary at binary_path"""
     from m5 import options
-    print("SPEC CPU Path:",spec_path)
+    print("SPEC CPU Path:",self._spec_cpu_path)
     
     for i in range(np):
-      self.cpu[i].workload = set_spec_bench(spec_path, _is_test, bench, i*100)
+      cwd_path = self._run_path + "/core_"+str(i) + "_" + bench
+      spec_abs_path = get_spec_bench_path(self._spec_cpu_path,bench,_is_test)
+      self.cpu[i].workload = set_spec_bench(spec_abs_path, False, bench, i*100, cwd_path)
       print(" -- process.cmd:",self.cpu[i].workload[0].cmd)
       self.cpu[i].createThreads()
 
@@ -275,8 +301,11 @@ class MySystem(System):
     from m5 import options
     
     for i in range(np):
-      self.cpu[i].workload = Process(
-                      cmd = [bench], executable = bench, pid=(i*100))
+      cwd_path = self._run_path + "/core_"+str(i) + "_" + bench
+      poly_abs_path = get_poly_bench_path(self._polybench_path, bench)
+      self.cpu[i].workload = set_polybench(poly_abs_path, bench, i*100, cwd_path)
+      # self.cpu[i].workload = Process(
+      #                 cmd = [bench], executable = bench, pid=(i*100))
       print(" -- process.cmd:",self.cpu[i].workload[0].cmd)
       self.cpu[i].createThreads()
 
@@ -295,5 +324,36 @@ class MySystem(System):
     # print(self.cpu.workload)
     process0_path = self.cpu[0].workload[0].executable
     self.workload = SEWorkload.init_compatible(process0_path)     
+
+  def setMixbench(self, bench,np):
+    """Set up the SE process to execute the Mix bench"""
+    from m5 import options
+
+    mix_bench = bench.split(":")
+    
+    if len(mix_bench) != np:
+      print("Mix Bench Only Supory 4 Core! {np}")
+      exit(1)  
+
+    for i in range(np):
+      cwd_path = self._run_path + "/core_"+str(i) + "_" + mix_bench[i]
+      if mix_bench[i] in spec_benchmark_list:      
+        spec_abs_path = get_spec_bench_path(self._spec_cpu_path,mix_bench[i],False)
+        self.cpu[i].workload = set_spec_bench(spec_abs_path, False, mix_bench[i], i*100, cwd_path)
+        print(" -- process.cmd:",self.cpu[i].workload[0].cmd)
+      elif mix_bench[i] in polybench_list:
+        poly_abs_path = get_poly_bench_path(self._polybench_path, mix_bench[i])
+        self.cpu[i].workload = set_polybench(poly_abs_path, mix_bench[i], i*100, cwd_path)
+        # Process(
+        #                 cmd = [mix_bench[i]], executable = mix_bench[i], pid=(i*100))
+        print(" -- process.cmd:",self.cpu[i].workload[0].cmd)
+      else: 
+        print("Not Support Benchmaark {} ! Only Support SPEC CPU or Polybench",mix_bench[i])
+        exit(1)          
+      self.cpu[i].createThreads()
+
+    # print(self.cpu.workload)
+    process0_path = self.cpu[0].workload[0].executable
+    self.workload = SEWorkload.init_compatible(process0_path)        
 
     
