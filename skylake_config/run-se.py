@@ -72,7 +72,8 @@ def check_and_handle_completion(cause, start_tick, end_tick):
             continue
             
         insts = cpu.totalInsts()
-        
+                
+        print(f"[{iteration}] Core {i} Insts={insts:,}")
         if insts >= TARGET_INSTS:
             core_done[i] = True
             core_insts_at_done[i] = insts
@@ -142,14 +143,21 @@ else:
 
 if args.str_maxinsts != None:
     max_inst = int(args.str_maxinsts.strip())
-    for i in range(np):
-        system.cpu[i].max_insts_any_thread = max_inst
+    # for i in range(np):
+    #     system.cpu[i].max_insts_any_thread = max_inst
 
 TARGET_INSTS = max_inst
-if max_inst == int(10e8):
-    QUANTUM_TICKS = int(10e6)  
-else:
-    QUANTUM_TICKS = int(max_inst/100)
+'''
+Worst Assumption: IPC 5
+CPU Frequency: 3.5GHz --> 1 Cycle --> 285 Ticks
+Estimation Running Ticks E_TICK: (TARGET_INSTS / IPC) * 285 tick/cycle
+--> QUANTUM_TICK = E_TICK/50
+'''
+# if max_inst == int(10e8):
+#     QUANTUM_TICKS = int(10e6)  
+# else:
+#     QUANTUM_TICKS = int(max_inst/100)
+QUANTUM_TICKS = int((float(max_inst) * 285 / 5) / 50)
 
 num_cores = len(system.cpu)
 core_done = [False] * num_cores
@@ -176,6 +184,7 @@ while done_cnt < num_cores:
     check_and_handle_completion(cause, start_tick, m5.curTick())
 
     if done_cnt == num_cores:
+        m5.stats.dump()
         break    
 
 print("-" * 60)

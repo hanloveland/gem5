@@ -98,8 +98,10 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid,_run_path=""):
             #process.cmd = [exe_binary] + ['expr2.in', '-o', 'expr2.s']
             #process.cmd = [exe_binary] + ['g23.in', '-o', 'g23.s']
             #process.cmd = [exe_binary] + ['s04.in', '-o', 's04.s']
-            #process.cmd = [exe_binary] + ['scilab.in', '-o', 'scilab.s']            
-        process.output = _bench + '.out'          
+            #process.cmd = [exe_binary] + ['scilab.in', '-o', 'scilab.s']     
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"                    
     elif _bench == "410.bwaves":
         exe_binary = _run_path + "/" + "bwaves" + exe_suffix
         process = Process(pid=_pid)
@@ -260,7 +262,9 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid,_run_path=""):
             process.cmd = [exe_binary] + ['SPEC-benchmark-test.ini']
         else:
             process.cmd = [exe_binary] + ['SPEC-benchmark-ref.ini']
-        process.output = _bench + '.out'       
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt" 
     elif _bench == "454.calculix":            
         exe_binary = _run_path + "/" + "calculix" + exe_suffix
         process = Process(pid=_pid)
@@ -363,7 +367,9 @@ def set_spec_bench(_spec_path,_is_test,_bench,_pid,_run_path=""):
             process.cmd = [exe_binary] + ['omnetpp.ini']
         else:
             process.cmd = [exe_binary] + ['omnetpp.ini']
-        process.output = _bench + '.out'          
+        process.cwd = _run_path
+        process.output = f"{_run_path}/stdout.txt"
+        process.errout = f"{_run_path}/stderr.txt"         
     elif _bench == "473.astar":
         exe_binary = _run_path + "/" + "astar" + exe_suffix
         process = Process(pid=_pid)
