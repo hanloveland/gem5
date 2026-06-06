@@ -895,7 +895,13 @@ openatFunc(SyscallDesc *desc, ThreadContext *tc,
      * Return the indirect target file descriptor back to the simulated
      * process to act as a handle for the opened file.
      */
-    auto ffdp = std::make_shared<FileFDEntry>(sim_fd, host_flags, path, 0);
+    // Store the ABSOLUTE host path actually opened (used_path), not the raw
+    // (possibly relative) target path. On checkpoint restore the FDArray
+    // reopens files by this stored name relative to gem5's OS cwd; a relative
+    // name (e.g. "inp.in") fails when the restoring process's working dir
+    // differs (e.g. multi-core SE where each core has its own cwd). Storing
+    // the absolute path makes restore reopen succeed regardless of cwd.
+    auto ffdp = std::make_shared<FileFDEntry>(sim_fd, host_flags, used_path, 0);
     // Record the file mode for checkpoint restoring
     ffdp->setFileMode(mode);
     int tgt_fd = p->fds->allocFD(ffdp);

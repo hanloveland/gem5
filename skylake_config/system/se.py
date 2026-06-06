@@ -241,11 +241,15 @@ class MySystem(System):
 
     return ranges
 
-  def setTestBinary(self, binary_path):
-    """Set up the SE process to execute the binary at binary_path"""
-    from m5 import options
-    self.cpu[0].workload = Process(
-                      cmd = [binary_path], executable = binary_path)
+  def setTestBinary(self, binary_path, options=None):
+    """Set up the SE process to execute the binary at binary_path.
+
+    options : optional list of argv strings passed to the binary (e.g.
+    ["/abs/dataset", "--nq", "1", "--nprobe", "32"]). Backward compatible:
+    callers passing only binary_path get cmd=[binary_path] as before."""
+    from m5 import options as _m5opts  # noqa: F401 (kept for parity w/ callers)
+    argv = [binary_path] + ([str(o) for o in options] if options else [])
+    self.cpu[0].workload = Process(cmd = argv, executable = binary_path)
     self.cpu[0].createThreads()
     process0_path = self.cpu[0].workload[0].executable
     self.workload = SEWorkload.init_compatible(process0_path)

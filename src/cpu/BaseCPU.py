@@ -73,6 +73,11 @@ class BaseCPU(ClockedObject):
         PyBindMethod("getCurrentInstCount"),
         PyBindMethod("scheduleSimpointsInstStop"),
         PyBindMethod("scheduleInstStopAnyThread"),
+        # Option D (per-core SimPoint stall alignment): expose context
+        # suspend/resume so the Python config can freeze/resume individual
+        # cores at their SimPoint targets. C++ bodies already exist in base.cc.
+        PyBindMethod("suspendContext"),
+        PyBindMethod("activateContext"),
     ]
 
     @classmethod

@@ -37,6 +37,8 @@ class Ramulator2 : public AbstractMemory
 
       protected:
         Tick recvAtomic(PacketPtr pkt) override { return ramulator2.recvAtomic(pkt); };
+        Tick recvAtomicBackdoor(PacketPtr pkt, MemBackdoorPtr &backdoor) override
+        { return ramulator2.recvAtomicBackdoor(pkt, backdoor); };
         void recvFunctional(PacketPtr pkt) override { ramulator2.recvFunctional(pkt); };
         bool recvTimingReq(PacketPtr pkt) override { return ramulator2.recvTimingReq(pkt); };
         void recvRespRetry() override { ramulator2.recvRespRetry(); };
@@ -133,6 +135,9 @@ class Ramulator2 : public AbstractMemory
   protected:
 
     Tick recvAtomic(PacketPtr pkt);
+    // Provide a backdoor (direct backing-store pointer) so NonCachingSimpleCPU
+    // can fast-forward via sendAtomicBackdoor (bypasses packet machinery).
+    Tick recvAtomicBackdoor(PacketPtr pkt, MemBackdoorPtr &backdoor);
     void recvFunctional(PacketPtr pkt);
     bool recvTimingReq(PacketPtr pkt);
     void recvRespRetry();

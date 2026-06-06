@@ -126,13 +126,25 @@ def addOptions(parser):
         help = "Ramulator2 Simulation Result file Path")           
 
     parser.add_argument(
-        '--ramu_cap', 
+        '--ramu_cap',
         action="store",
         type=str,
         default=None,
         help="""Ramulator2 Memory Capacity (string). unit is GB)""",
-    )       
-        
+    )
+
+    parser.add_argument(
+        '--host_cap',
+        action="store",
+        type=str,
+        default=None,
+        help="""Host DRAM capacity = gem5 system physical-memory / address-range
+                size that the workload sees and gem5 backs (string, unit GB).
+                Decoupled from --ramu_cap (the Ramulator2 timing-model device
+                capacity). If omitted, defaults to --ramu_cap (legacy behavior:
+                host == ramulator). Constraint: host_cap <= ramu_cap.""",
+    )
+
     parser.add_argument(
         "-I",
         "--maxinsts",

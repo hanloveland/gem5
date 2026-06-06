@@ -121,7 +121,10 @@ Ramulator2::nbrOutstanding() const
 void
 Ramulator2::tick()
 {
-    // Only tick when it's timing mode
+    const Tick tck =
+        ramulator2_memorysystem->get_tCK() * sim_clock::as_float::ns;
+
+    // Only advance the detailed DRAM model in timing mode.
     if (system()->isTimingMode()) {
         ramulator2_memorysystem->tick();
 
@@ -131,10 +134,16 @@ Ramulator2::tick()
             retryReq = false;
             port.sendRetryReq();
         }
+        // fine-grained ticking while measuring
+        schedule(tickEvent, curTick() + tck);
+    } else {
+        // Atomic mode (e.g. SimPoint fast-forward): the detailed model is NOT
+        // advanced, so scheduling a tick every DRAM cycle merely spams empty
+        // events and makes atomic fast-forward crawl (~100x slowdown). Poll
+        // coarsely instead; fine-grained ticking resumes within one coarse
+        // interval (<~1us sim-time) once the system enters timing mode.
+        schedule(tickEvent, curTick() + tck * 1000);
     }
-
-    schedule(tickEvent,
-        curTick() + ramulator2_memorysystem->get_tCK() * sim_clock::as_float::ns);
 }
 
 Tick
@@ -145,6 +154,17 @@ Ramulator2::recvAtomic(PacketPtr pkt)
 
     access(pkt);
     return 50000;   // Arbitary latency of 50ns
+}
+
+Tick
+Ramulator2::recvAtomicBackdoor(PacketPtr pkt, MemBackdoorPtr &backdoor)
+{
+    Tick latency = recvAtomic(pkt);
+    // Hand out a direct pointer to the backing store (set up by the system's
+    // PhysicalMemory). Lets NonCachingSimpleCPU fast-forward without a packet
+    // round-trip per access (mirrors SimpleMemory::recvAtomicBackdoor).
+    getBackdoor(backdoor);
+    return latency;
 }
 
 void
